@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bluesky.mymvptodox.taskslist.ScrollChildSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/refresh_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--TODO  比源码少写了clickable和orientation-->
+    <RelativeLayout
+        android:id="@+id/rl_taskListContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/ll_TaskList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+        </LinearLayout>
+    </RelativeLayout>
+</com.bluesky.mymvptodox.taskslist.ScrollChildSwipeRefreshLayout>
