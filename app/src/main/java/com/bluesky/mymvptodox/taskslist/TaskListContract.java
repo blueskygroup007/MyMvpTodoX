@@ -28,7 +28,7 @@ public interface TaskListContract {
         /**
          * 从网络加载task列表
          *
-         * @param forceUpdate 前端界面是否更新
+         * @param forceUpdate 是否强制更新
          */
         void loadTasks(boolean forceUpdate);
 

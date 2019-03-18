@@ -9,7 +9,7 @@ import java.util.List;
  * @date 2019/3/5
  * Description: Task数据的接口,访问数据的主要入口
  */
-public interface TaskDataSource {
+public interface TasksDataSource {
 
     /**
      * 获取所有task的回调.注意"Tasks"
