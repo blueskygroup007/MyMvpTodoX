@@ -5,26 +5,38 @@ import com.google.common.base.Strings;
 import java.util.Objects;
 import java.util.UUID;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 /**
  * @author BlueSky
  * @date 2019/3/4
  * Description: 一个任务类的描述
  */
+@Entity
 public final class Task {
 
+    @PrimaryKey
+    @ColumnInfo(name="id")
     private final String mId;
+    @ColumnInfo(name = "title")
     private final String mTitle;
+    @ColumnInfo(name = "description")
     private final String mDescription;
+    @ColumnInfo(name = "completed")
     private final boolean mCompleted;
 
+    @Ignore
     public Task(String title, String description) {
         this(UUID.randomUUID().toString(), title, description, false);
     }
-
+    @Ignore
     public Task(String id, String title, String description) {
         this(id, title, description, false);
     }
-
+    @Ignore
     public Task(String title, String description, boolean completed) {
         this(UUID.randomUUID().toString(), title, description, completed);
     }

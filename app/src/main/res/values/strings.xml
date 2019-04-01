@@ -28,5 +28,7 @@
     <string name="label_completed">Completed TO-DOs</string>
 
     <string name="successfully_saved_task_message">TO-DO saved</string>
+    <string name="list_title">TO-DO List</string>
+    <string name="statistics_title">Statistics</string>
 
 </resources>

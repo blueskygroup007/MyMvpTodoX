@@ -3,6 +3,9 @@ package com.bluesky.mymvptodox.data.source.remote;
 import com.bluesky.mymvptodox.data.Task;
 import com.bluesky.mymvptodox.data.source.TasksDataSource;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * @author BlueSky
  * @date 2019/3/12
@@ -10,6 +13,33 @@ import com.bluesky.mymvptodox.data.source.TasksDataSource;
  */
 public class TaskRemoteDataSource implements TasksDataSource {
 
+    private static TaskRemoteDataSource INSTANCE;
+
+    private static final int SERVICE_LATENCY_IN_MILLIS = 5000;
+
+    private final static Map<String, Task> TASKS_SERVICE_DATA;
+
+    static {
+        TASKS_SERVICE_DATA = new LinkedHashMap<>(2);
+        addTask("Build tower in Pisa", "Ground looks good, no foundation work required.");
+        addTask("Finish bridge in Tacoma", "Found awesome girders at half the cost!");
+
+    }
+
+    public static TaskRemoteDataSource getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new TaskRemoteDataSource();
+        }
+        return INSTANCE;
+    }
+
+    private TaskRemoteDataSource() {
+    }
+
+    private static void addTask(String title, String description) {
+        Task newTask = new Task(title, description);
+        TASKS_SERVICE_DATA.put(newTask.getId(), newTask);
+    }
     //TODO 仅仅继承了方法,还未具体实现
 
 

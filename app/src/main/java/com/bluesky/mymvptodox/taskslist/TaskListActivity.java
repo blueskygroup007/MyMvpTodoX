@@ -1,8 +1,15 @@
 package com.bluesky.mymvptodox.taskslist;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.bluesky.mymvptodox.R;
+import com.bluesky.mymvptodox.data.source.TasksRepository;
+import com.bluesky.mymvptodox.data.source.local.TaskLocalDataSource;
+import com.bluesky.mymvptodox.data.source.remote.TaskRemoteDataSource;
+import com.bluesky.mymvptodox.statistics.StatisticsActivity;
+import com.bluesky.mymvptodox.util.ActivityUtils;
+import com.bluesky.mymvptodox.util.Injection;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -10,6 +17,7 @@ import android.view.View;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -28,8 +36,9 @@ import android.view.MenuItem;
 public class TaskListActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String CURRENT_FILTERING_KEY="CURRENT_FILTERING_KEY";
     private DrawerLayout mDrawerLayout;
-
+    private TaskListPresenter mPresenter;
 
 
     @Override
@@ -63,6 +72,29 @@ public class TaskListActivity extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //以findFragmentById的方式生成fragment
+        TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.fl_content);
+        //手动创建fragment
+        if (taskListFragment == null) {
+            taskListFragment = TaskListFragment.newInstance(0, "0");
+            ActivityUtils.addFragmentToActivity(getSupportFragmentManager(), taskListFragment, R.id.fl_content);
+        }
+        //创建presenter
+        //todo 这里的context使用了getApplicationContext
+        new TaskListPresenter(Injection.provideTasksRepository(getApplicationContext()), taskListFragment);
+
+        //恢复存resume状态
+        if (savedInstanceState!=null){
+            TasksFilterType currentFiltering= (TasksFilterType) savedInstanceState.getSerializable(CURRENT_FILTERING_KEY);
+            mPresenter.setFiltering(currentFiltering);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putSerializable(CURRENT_FILTERING_KEY, mPresenter.getFiltering());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -103,18 +135,10 @@ public class TaskListActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_list) {
+            //Todo 源码并没有做什么，只是说，当前就是在这个屏幕下
+        } else if (id == R.id.nav_stat) {
+            Intent intent=new Intent(TaskListActivity.this, StatisticsActivity.class);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
