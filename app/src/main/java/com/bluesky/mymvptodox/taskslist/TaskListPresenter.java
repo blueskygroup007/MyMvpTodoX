@@ -102,6 +102,9 @@ public class TaskListPresenter implements TaskListContract.Presenter {
                 }
                 //当前view可能无法处理UI更新
                 if (!mTasksView.isActive()) {
+                    return;
+                }
+                if (showLoadingUI) {
                     mTasksView.setLoadingIndicator(false);
                 }
                 processTasks(tasksToShow);

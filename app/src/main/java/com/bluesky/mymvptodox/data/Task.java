@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import java.util.Objects;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -18,7 +19,10 @@ import androidx.room.PrimaryKey;
 @Entity
 public final class Task {
 
+    //todo 主键必须有NonNull注解
+
     @PrimaryKey
+    @NonNull
     @ColumnInfo(name="id")
     private final String mId;
     @ColumnInfo(name = "title")

@@ -13,8 +13,9 @@ import androidx.room.RoomDatabase;
  * @date 2019/3/20
  * Description:
  */
-@Database(entities = {Task.class}, version = 1)
+@Database(entities = {Task.class}, version = 1,exportSchema = false)
 public abstract class ToDoDatabase extends RoomDatabase {
+    //todo exportSchema = false 否则报错
     private static ToDoDatabase INSTANCE;
 
     public abstract TasksDao taskDao();

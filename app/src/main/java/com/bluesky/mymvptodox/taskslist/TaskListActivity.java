@@ -55,10 +55,11 @@ public class TaskListActivity extends AppCompatActivity
             ab.setHomeAsUpIndicator(R.drawable.ic_menu);
             ab.setDisplayHomeAsUpEnabled(true);
         }
-        //FloatingActionButton
-        FloatingActionButton fab = findViewById(R.id.fab);
+        //FloatingActionButton,由fragement去处理了
+
+/*        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+                .setAction("Action", null).show());*/
         //DrawerLayout
         //源码中没有使用toggle.而是在onOptionsItemSelected中给R.id.home设定打开drawer.(滑动开启关闭应该是自动的)
         mDrawerLayout = findViewById(R.id.drawer_layout);
@@ -82,7 +83,7 @@ public class TaskListActivity extends AppCompatActivity
         }
         //创建presenter
         //todo 这里的context使用了getApplicationContext
-        new TaskListPresenter(Injection.provideTasksRepository(getApplicationContext()), taskListFragment);
+        mPresenter=new TaskListPresenter(Injection.provideTasksRepository(getApplicationContext()), taskListFragment);
 
         //恢复存resume状态
         if (savedInstanceState!=null){

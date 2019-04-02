@@ -60,7 +60,7 @@ public interface TasksDao {
      * 删除所有task
      */
     @Delete
-    void deleteTasks();
+    void deleteTasks(List<Task> tasks);
 
     /**
      * 删除指定id的task

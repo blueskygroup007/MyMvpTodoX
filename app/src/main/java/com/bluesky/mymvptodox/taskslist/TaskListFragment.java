@@ -24,6 +24,7 @@ import com.bluesky.mymvptodox.taskdetail.TaskDetailActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -95,7 +96,7 @@ public class TaskListFragment extends Fragment implements TaskListContract.View 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mListAdapter = new TaskListAdapter(new ArrayList<>(0), mItemListener);
     }
 
     @Override
@@ -422,4 +423,21 @@ public class TaskListFragment extends Fragment implements TaskListContract.View 
 
         void onActivateTaskClick(Task activatedTask);
     }
+
+    TaskItemListener mItemListener = new TaskItemListener() {
+        @Override
+        public void onTaskClick(Task clickedTask) {
+            mPresenter.openTaskDetails(clickedTask);
+        }
+
+        @Override
+        public void onCompleteTaskClick(Task completedTask) {
+            mPresenter.completeTask(completedTask);
+        }
+
+        @Override
+        public void onActivateTaskClick(Task activatedTask) {
+            mPresenter.activateTask(activatedTask);
+        }
+    };
 }
