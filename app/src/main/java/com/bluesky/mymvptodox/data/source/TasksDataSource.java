@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author BlueSky
  * @date 2019/3/5
- * Description: Task数据的接口,访问数据的主要入口
+ * Description: Task数据的接口
  */
 public interface TasksDataSource {
 
