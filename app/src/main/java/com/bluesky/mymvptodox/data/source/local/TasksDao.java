@@ -63,6 +63,12 @@ public interface TasksDao {
     void deleteTasks(List<Task> tasks);
 
     /**
+     * 删除所有task(使用Query注解)
+     */
+    @Query("DELETE FROM Task")
+    void deleteTasks();
+
+    /**
      * 删除指定id的task
      *
      * @param taskId

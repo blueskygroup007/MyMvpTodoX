@@ -120,7 +120,13 @@ public class TaskLocalDataSource implements TasksDataSource {
 
     @Override
     public void activateTask(Task task) {
-
+        Runnable activateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mTasksDao.updateCompleted(task.getId(), false);
+            }
+        };
+        mAppExecutors.getDiskIO().execute(activateRunnable);
     }
 
     @Override
@@ -130,7 +136,15 @@ public class TaskLocalDataSource implements TasksDataSource {
 
     @Override
     public void clearCompletedTasks() {
+        Runnable clearTasksRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mTasksDao.deleteCompletedTasks();
 
+            }
+        };
+
+        mAppExecutors.getDiskIO().execute(clearTasksRunnable);
     }
 
     @Override
@@ -140,7 +154,14 @@ public class TaskLocalDataSource implements TasksDataSource {
 
     @Override
     public void deleteAllTasks() {
+        Runnable deleteRunnable = new Runnable() {
+            @Override
+            public void run() {
+                mTasksDao.deleteTasks();
+            }
+        };
 
+        mAppExecutors.getDiskIO().execute(deleteRunnable);
     }
 
     @Override

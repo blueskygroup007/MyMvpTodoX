@@ -85,7 +85,7 @@ public class TaskRemoteDataSource implements TasksDataSource {
     @Override
     public void completeTask(Task task) {
         Task completedTask = new Task(task.getId(), task.getTitle(), task.getDescription(), true);
-        TASKS_SERVICE_DATA.put(task.getId(), task);
+        TASKS_SERVICE_DATA.put(task.getId(), completedTask);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class TaskRemoteDataSource implements TasksDataSource {
     @Override
     public void activateTask(Task task) {
         Task activeTask = new Task(task.getId(), task.getTitle(), task.getDescription());
-        TASKS_SERVICE_DATA.put(task.getId(), task);
+        TASKS_SERVICE_DATA.put(task.getId(), activeTask);
     }
 
     @Override

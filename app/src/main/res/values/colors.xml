@@ -5,5 +5,7 @@
     <color name="colorAccent">#D81B60</color>
 
     <drawable name="touchFeedback">#CFD8DC</drawable>
+    <drawable name="completedTaskBackground">#CCCCCC</drawable>
+
     <drawable name="transparent">@android:color/transparent</drawable>
 </resources>
