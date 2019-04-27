@@ -9,6 +9,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bluesky.rabbit_habit.R;
+import com.bluesky.rabbit_habit.data.Alarm;
 import com.bluesky.rabbit_habit.data.Habit;
 
 import java.util.List;
@@ -53,6 +54,7 @@ public class HabitRecyclerViewAdapter extends RecyclerView.Adapter<HabitRecycler
      * 构造时,只传了一个空data
      * 如果需要交互,可以传Listener进来
      * Listener可以是adapter与fragment交互,也可以是和Activity交互
+     *
      * @param habits
      */
     public HabitRecyclerViewAdapter(List<Habit> habits) {
@@ -69,15 +71,20 @@ public class HabitRecyclerViewAdapter extends RecyclerView.Adapter<HabitRecycler
     @Override
     public void onBindViewHolder(@NonNull HabitRecyclerViewAdapter.VH holder, int position) {
         final Habit habit = mHabits.get(position);
-        holder.pb_time.setMax(habit.getAlarm().getInterval_time());
-        holder.pb_time.setProgress(habit.getAlarm().getCurrent_time());
         holder.switch_completed.setChecked(habit.isCompleted());
         holder.iv_icon.setImageResource(habit.getIcon());
         holder.tv_title.setText(habit.getTitle());
         holder.tv_description.setText(habit.getDescription());
+        holder.mRoot.setSelected(habit.isCompleted());
+        if (habit.getAlarm() == null) {
+            Alarm alarm = new Alarm(100, 50, 30, 10, 20, 0, 0);
+            habit.setAlarm(alarm);
+        }
+
+        holder.pb_time.setMax(habit.getAlarm().getInterval_time());
+        holder.pb_time.setProgress(habit.getAlarm().getCurrent_time());
         holder.pb_number.setMax(habit.getAlarm().getCount_number());
         holder.pb_number.setProgress(habit.getAlarm().getCurrent_number());
-        holder.mRoot.setSelected(habit.isCompleted());
     }
 
     @Override
@@ -87,6 +94,7 @@ public class HabitRecyclerViewAdapter extends RecyclerView.Adapter<HabitRecycler
 
     /**
      * 给adapter传真正的data,并刷新
+     *
      * @param habits
      */
     public void replaceData(List<Habit> habits) {

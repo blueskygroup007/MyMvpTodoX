@@ -75,7 +75,8 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
             }
         }
         transaction.show(fragment).commit();
-
+        /*Alarm alarm=new Alarm(1, 1, 1, 1, 1, 1, 1);
+        Alarm alarm1=alarm.clone();*/
     }
 
     private HabitFragment mHabitFragment;

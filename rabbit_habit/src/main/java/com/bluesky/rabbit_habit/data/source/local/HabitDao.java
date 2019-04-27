@@ -43,6 +43,12 @@ public interface HabitDao {
     @Delete
     void deleteHabits(Habit habit);
 
-    @Query("DELETE FROM habit WHERE id=:habitId")
+    /**
+     * 删除表中所有记录
+     */
+    @Query("DELETE FROM Habit")
+    void deleteAllHabits();
+
+    @Query("DELETE FROM Habit WHERE id=:habitId")
     int deleteHabitById(String habitId);
 }

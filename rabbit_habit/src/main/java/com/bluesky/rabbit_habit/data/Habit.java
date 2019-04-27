@@ -1,5 +1,7 @@
 package com.bluesky.rabbit_habit.data;
 
+import com.bluesky.rabbit_habit.constant.AppConstant;
+
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
@@ -17,7 +19,7 @@ import androidx.room.PrimaryKey;
 @Entity
 public class Habit {
     @Ignore
-    private static final int DEFAULT_ICON = 0;
+    private static final int DEFAULT_ICON = AppConstant.DEFAULT_ICON;
     //todo 主键必须有NonNull注解
     //todo 用final修饰成员变量,表示只允许在构造时给变量赋值,所以没有setXXX()方法
     @PrimaryKey
@@ -74,6 +76,10 @@ public class Habit {
         mAlarm = null;
     }
 
+    @Ignore
+    public Habit(int icon, String title, String description, boolean completed, Alarm alarm) {
+        this(UUID.randomUUID().toString(), icon, title, description, completed, alarm);
+    }
 
     @NonNull
     public String getId() {
@@ -133,6 +139,6 @@ public class Habit {
                 ", mDescription='" + mDescription + '\'' +
                 ", mCompleted=" + mCompleted +
                 ", mAlarm=" + mAlarm +
-                '}';
+                '}' + '\n';
     }
 }
