@@ -2,15 +2,17 @@ package com.bluesky.rabbit_habit.habit_list;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.bluesky.rabbit_habit.R;
 import com.bluesky.rabbit_habit.data.Habit;
-import com.bluesky.rabbit_habit.data.source.local.HabitDao;
-import com.bluesky.rabbit_habit.data.source.local.RHDatabase;
+import com.bluesky.rabbit_habit.data.source.HabitsDataSource;
+import com.bluesky.rabbit_habit.data.source.HabitsRepository;
 import com.bluesky.rabbit_habit.habit_list.dummy.DummyContent.DummyItem;
+import com.bluesky.rabbit_habit.util.Injection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,14 +28,16 @@ import androidx.recyclerview.widget.RecyclerView;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class HabitFragment extends Fragment {
+public class HabitFragment extends Fragment implements HabitListContract.View{
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
+    private static final String TAG = HabitFragment.class.getSimpleName().toString();
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     private HabitRecyclerViewAdapter mAdapter;
+    private RecyclerView mRecyclerView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -69,7 +73,7 @@ public class HabitFragment extends Fragment {
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            mRecyclerView = (RecyclerView) view;
 
             //todo 当行数大于1时,设置排列方式为网格
 /*            if (mColumnCount <= 1) {
@@ -80,7 +84,7 @@ public class HabitFragment extends Fragment {
 
 //            recyclerView.setAdapter(new MyHabitRecyclerViewAdapter(DummyContent.ITEMS, mListener));
             mAdapter = new HabitRecyclerViewAdapter(new ArrayList<>(0));
-            recyclerView.setAdapter(mAdapter);
+            mRecyclerView.setAdapter(mAdapter);
         }
         return view;
     }
@@ -94,10 +98,22 @@ public class HabitFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        HabitDao dao = RHDatabase.getInstance(getContext()).habitDao();
-        List<Habit> habits = dao.getHabits();
+/*        HabitDao dao = RHDatabase.getInstance(getContext()).habitDao();
+        List<Habit> habits = dao.getHabits();*/
+        HabitsRepository repository = Injection.provideTasksRepository(getContext());
+        repository.getHabits(new HabitsDataSource.LoadHabitsCallback() {
+            @Override
+            public void onHabitsLoaded(List<Habit> habits) {
+                mAdapter.replaceData(habits);
+                Log.e(TAG, habits.toString());
+            }
 
-        mAdapter.replaceData(habits);
+            @Override
+            public void onDataNotAvailable() {
+                Log.d(TAG, "取数据失败................");
+            }
+        });
+
     }
 
     @Override
@@ -115,6 +131,55 @@ public class HabitFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void setLoadingIndicator(boolean active) {
+        //getView获取的是fragment的onCreateView返回的rootview
+        if (getView() == null) {
+            return;
+        }
+        if (mRecyclerView!=null){
+         //todo -----------------------当前进度
+            //todo 主线---生成V和P的实现类
+            //todo 支线---替换RecyclerView为SwipeRefreshLayout以支持下拉刷新
+        }
+
+    }
+
+    @Override
+    public void showHabits(List<Habit> habits) {
+
+    }
+
+    @Override
+    public void showAddHabit() {
+
+    }
+
+    @Override
+    public void showHabitDetailsUi(String habitId) {
+
+    }
+
+    @Override
+    public void showLoadingHabitsError() {
+
+    }
+
+    @Override
+    public void showNoHabits() {
+
+    }
+
+    @Override
+    public boolean isActive() {
+        return false;
+    }
+
+    @Override
+    public void setPresenter(HabitListContract.Presenter presenter) {
+
     }
 
     /**

@@ -8,7 +8,7 @@ import androidx.room.Entity;
  * Description:
  */
 @Entity
-public class Alarm {
+public class Alarm implements Cloneable {
     private int count_number;
     private int current_number;
     private int interval_time;
@@ -104,5 +104,10 @@ public class Alarm {
                 ", style=" + style +
                 ", feedback=" + feedback +
                 '}';
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
