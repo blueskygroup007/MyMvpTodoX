@@ -1,8 +1,8 @@
-package com.bluesky.rabbit_habit.habit_list;
+package com.bluesky.habit.habit_list;
 
-import com.bluesky.rabbit_habit.base.BasePresenter;
-import com.bluesky.rabbit_habit.base.BaseView;
-import com.bluesky.rabbit_habit.data.Habit;
+import com.bluesky.habit.base.BasePresenter;
+import com.bluesky.habit.base.BaseView;
+import com.bluesky.habit.data.Habit;
 
 import java.util.List;
 
