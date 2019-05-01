@@ -1,4 +1,4 @@
-package com.bluesky.habit.base;
+package com.bluesky.rabbit_habit.base;
 
 /**
  * @author BlueSky

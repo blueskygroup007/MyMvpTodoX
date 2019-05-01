@@ -2,6 +2,8 @@ package com.bluesky.habit.data;
 
 import com.bluesky.habit.constant.AppConstant;
 
+import com.bluesky.rabbit_habit.constant.AppConstant;
+
 import java.util.UUID;
 
 import androidx.annotation.NonNull;

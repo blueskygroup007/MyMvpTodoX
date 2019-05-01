@@ -1,6 +1,6 @@
-package com.bluesky.habit.constant;
+package com.bluesky.rabbit_habit.constant;
 
-import com.bluesky.habit.R;
+import com.bluesky.rabbit_habit.R;
 
 /**
  * @author BlueSky
