@@ -299,7 +299,7 @@ public class HabitFragment extends Fragment implements HabitListContract.View {
             if (convertView == null) {
                 holder = new ViewHolder();
                 LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-                convertView = inflater.inflate(R.layout.item_habit, parent, false);
+                convertView = inflater.inflate(R.layout.item_habit_final, parent, false);
                 holder.pb_time = convertView.findViewById(R.id.pb_time);
                 holder.switch_completed = convertView.findViewById(R.id.switch_completed);
                 holder.iv_icon = convertView.findViewById(R.id.iv_icon);
@@ -315,6 +315,7 @@ public class HabitFragment extends Fragment implements HabitListContract.View {
 
             holder.pb_time.setMax(habit.getAlarm().getInterval_time());
             holder.pb_time.setProgress(habit.getAlarm().getCurrent_time());
+            holder.pb_time.setProgress(50);//测试代码
             holder.switch_completed.setChecked(habit.isCompleted());
             holder.iv_icon.setImageResource(habit.getIcon());
             holder.tv_title.setText(habit.getTitle());

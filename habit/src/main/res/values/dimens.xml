@@ -27,4 +27,9 @@
     <dimen name="padding_list_item">8dp</dimen>
     <dimen name="margin_activity_vertical">16dp</dimen>
 
+    <dimen name="font_small">12sp</dimen>
+    <dimen name="font_normal">16sp</dimen>
+    <dimen name="font_large">24sp</dimen>
+    <dimen name="font_huge">32sp</dimen>
+
 </resources>
