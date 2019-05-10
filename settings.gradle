@@ -1,1 +1,1 @@
-include ':app', ':habit'
+include ':app', ':habit', ':alarmclock'

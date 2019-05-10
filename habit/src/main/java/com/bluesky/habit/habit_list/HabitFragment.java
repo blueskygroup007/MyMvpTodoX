@@ -11,15 +11,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Switch;
 import android.widget.TextView;
 
+import com.app.progresviews.ProgressWheel;
 import com.bluesky.habit.R;
 import com.bluesky.habit.data.Habit;
 import com.bluesky.habit.data.source.HabitsDataSource;
 import com.bluesky.habit.data.source.HabitsRepository;
 import com.bluesky.habit.habit_list.dummy.DummyContent.DummyItem;
 import com.bluesky.habit.util.Injection;
+import com.suke.widget.SwitchButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -313,9 +314,12 @@ public class HabitFragment extends Fragment implements HabitListContract.View {
             //TODO ----------当前进度-----------------
             final Habit habit = getItem(position);
 
-            holder.pb_time.setMax(habit.getAlarm().getInterval_time());
-            holder.pb_time.setProgress(habit.getAlarm().getCurrent_time());
-            holder.pb_time.setProgress(50);//测试代码
+            //holder.pb_time.setMax(habit.getAlarm().getInterval_time());
+            //holder.pb_time.setProgress(habit.getAlarm().getCurrent_time());
+            holder.pb_time.setDefText("当前:");
+            holder.pb_time.setStepCountText(habit.getAlarm().getCurrent_time() + "");
+            holder.pb_time.setPercentage(habit.getAlarm().getCurrent_time() * 100 / habit.getAlarm().getInterval_time());
+
             holder.switch_completed.setChecked(habit.isCompleted());
             holder.iv_icon.setImageResource(habit.getIcon());
             holder.tv_title.setText(habit.getTitle());
@@ -325,10 +329,10 @@ public class HabitFragment extends Fragment implements HabitListContract.View {
             //修改item的背景变化
             convertView.setSelected(habit.isCompleted());
 
-            holder.switch_completed.setOnClickListener(new View.OnClickListener() {
+            holder.switch_completed.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
                 @Override
-                public void onClick(View v) {
-                    if (!habit.isCompleted()) {
+                public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                    if (isChecked) {
                         mItemListener.onCompleteTaskClick(habit);
                     } else {
                         mItemListener.onActivateTaskClick(habit);
@@ -346,8 +350,8 @@ public class HabitFragment extends Fragment implements HabitListContract.View {
         }
 
         class ViewHolder {
-            ProgressBar pb_time;
-            Switch switch_completed;
+            ProgressWheel pb_time;
+            SwitchButton switch_completed;
             ImageView iv_icon;
             TextView tv_title;
             TextView tv_description;

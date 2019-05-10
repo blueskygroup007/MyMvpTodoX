@@ -48,5 +48,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha04'
     implementation 'com.google.guava:guava:27.1-jre'
     implementation 'androidx.test.espresso:espresso-idling-resource:3.2.0-alpha04'
+    implementation 'com.zekapp.library:progreswheelview:1.1.5'
+    implementation 'com.github.zcweng:switch-button:0.0.3@aar'
     /*因为无法引用idling.而修改了半天另一个模块的gradle文件,无语*/
 }

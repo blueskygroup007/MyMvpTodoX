@@ -1,5 +1,7 @@
 package com.bluesky.habit.habit_list;
 
+import android.util.Log;
+
 import com.bluesky.habit.data.Habit;
 import com.bluesky.habit.data.source.HabitsDataSource;
 import com.bluesky.habit.data.source.HabitsRepository;
@@ -15,6 +17,7 @@ import java.util.List;
  */
 public class HabitListPresenter implements HabitListContract.Presenter {
 
+    private static final String TAG = "HabitListPresenter";
     private final HabitsRepository mRepository;
 
     private final HabitListContract.View mView;
@@ -96,12 +99,13 @@ public class HabitListPresenter implements HabitListContract.Presenter {
 
     @Override
     public void completeHabit(Habit completedHabit) {
+        Log.d(TAG, "habit paused!!!");
 
     }
 
     @Override
     public void activateHabit(Habit activeHabit) {
-
+        Log.d(TAG, "habit actived!!!");
     }
 
     @Override
