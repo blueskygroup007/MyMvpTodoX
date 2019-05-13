@@ -12,7 +12,9 @@ public class AlarmReceiver extends BroadcastReceiver {
         // an Intent broadcast.
 //        throw new UnsupportedOperationException("Not yet implemented");
 
-        Intent clockIntent = new Intent(context, ClockAlarmActivity.class);
+        //这里收到闹钟到时广播.
+        //启动后台加速度传感器监听
+        Intent clockIntent = new Intent(context, MainActivity.class);
         clockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(clockIntent);
     }

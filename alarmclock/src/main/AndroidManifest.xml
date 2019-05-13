@@ -24,8 +24,6 @@
                 <action android:name="com.bluesky.alram.clock" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".SensorReceiver" />
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
