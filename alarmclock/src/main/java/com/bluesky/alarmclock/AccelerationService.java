@@ -42,6 +42,8 @@ public class AccelerationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e(TAG, "监听服务启动了");
+
         if (mMessenger == null) {
             mMessenger = (Messenger) intent.getExtras().get("messenger");
         }
@@ -82,6 +84,8 @@ public class AccelerationService extends Service {
                     msg.what = 1;
                     try {
                         mMessenger.send(msg);
+                        //完成了一次消息发送.该service已经不再有用
+                        sensorManager.unregisterListener(mLisenter, mSensor);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }

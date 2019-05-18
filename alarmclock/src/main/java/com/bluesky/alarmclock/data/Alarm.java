@@ -24,4 +24,12 @@ public class Alarm {
     public void setInterval(int interval) {
         this.interval = interval;
     }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "name='" + name + '\'' +
+                ", interval=" + interval +
+                '}';
+    }
 }

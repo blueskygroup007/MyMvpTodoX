@@ -37,48 +37,25 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
         mContext = ((MainActivity) mView).getBaseContext();
         mHandler = ((MainActivity) mView).getHandler();
 //        mMessenger=((MainActivity)mView).getMessenger();
+
     }
 
     @Override
     public void startAlarm(Alarm alarm) {
-        AlarmUtils.setAlarm(mContext, AlarmReceiver.class, alarm.getInterval());
-        mStartMillis = System.currentTimeMillis();
-        startAccService(mContext);
-    }
+        Log.e(TAG, "启动Alarm....");
 
-    private void startAccService(Context context) {
-        if (mService == null) {
-            mService = new Intent(context, AccelerationService.class);
-            mService.putExtra("messenger", new Messenger(mHandler));
-        }
-        context.startService(mService);
-        Log.e(TAG, "启动了sensor监听....");
-
-    }
-
-
-    @Override
-    public void stopAlarm(Alarm alarm) {
-        mContext.stopService(mService);
-        mView.closeAlarmDialog();
-        setVibrator(false);
-    }
-
-    @Override
-    public void pauseAlarm(Alarm alarm) {
-        AlarmUtils.cancelAlarm(mContext, AlarmReceiver.class);
-        mRemainMillis = alarm.getInterval() - (System.currentTimeMillis() - mStartMillis);
-        Log.e(TAG, "剩余时间是:" + mRemainMillis / 1000 + "秒");
-    }
-
-
-    @Override
-    public void start() {
         mModel.getAlarm(new AlarmModel.AlarmDataCallBack() {
             @Override
             public void onSuccess(Alarm alarm) {
-                mView.showAlarm(alarm);
-                setVibrator(true);
+                Log.e(TAG, "alarm数据=" + alarm.toString());
+
+                /*
+                 * 当activity被回收时,MainActivity.AlarmReceiver这个广播接收者无法启动
+                 */
+
+                //这里传入广播接收者的类名
+                AlarmUtils.setAlarm(mContext, AlarmClockReceiver.class, alarm.getInterval());
+                mStartMillis = System.currentTimeMillis();
             }
 
             @Override
@@ -86,6 +63,68 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
 
             }
         });
+
+        //不在这里启动加速度监听.闹钟到期时再启动
+//        startAccService(mContext);
+    }
+
+    private void startAccService(Context context) {
+        Log.e(TAG, "启动了sensor监听....");
+
+        if (mService == null) {
+            mService = new Intent(context, AccelerationService.class);
+            mService.putExtra("messenger", new Messenger(mHandler));
+        }
+        context.startService(mService);
+
+    }
+
+
+    @Override
+    public void stopAlarm(Alarm alarm) {
+        Log.e(TAG, "停止Alarm...");
+        stopAccService();
+        mView.closeAlarmDialog();
+        setVibrator(false);
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startAlarm(null);
+            }
+        }, 5000);
+    }
+
+    @Override
+    public void pauseAlarm(Alarm alarm) {
+        Log.e(TAG, "暂停Alarm...");
+
+        AlarmUtils.cancelAlarm(mContext, AlarmClockReceiver.class);
+        mRemainMillis = alarm.getInterval() - (System.currentTimeMillis() - mStartMillis);
+        Log.e(TAG, "剩余时间是:" + mRemainMillis / 1000 + "秒");
+    }
+
+    @Override
+    public void onAlarmTimeIsUp(Alarm alarm) {
+        Log.e(TAG, "Alarm计时到期...");
+
+        mView.showAlarmDialog();
+        setVibrator(true);
+        startAccService(mContext);
+    }
+
+    @Override
+    public void stopAccService() {
+        mContext.stopService(mService);
+    }
+
+
+    @Override
+    public void start() {
+        Log.e(TAG, "Presenter.start()...");
+
+        /*
+         *这里应该是放置程序启动初期,初始化界面,加载列表等操作
+         */
     }
 
     private void setVibrator(boolean onOrOff) {
@@ -95,7 +134,7 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
         }
 
         if (onOrOff) {
-            vibrator.vibrate(500);
+            vibrator.vibrate(new long[]{500, 500}, 0);
         } else {
             vibrator.cancel();
         }

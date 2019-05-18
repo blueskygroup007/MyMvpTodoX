@@ -6,9 +6,18 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!--控件统一-->
+        <item name="checkboxStyle">@style/CheckBoxSel</item>
     </style>
 
     <style name="FullScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
+    </style>
+
+
+    <style name="CheckBoxSel" parent="Widget.AppCompat.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/icon_checkbox_button_pic</item>
+        <item name="android:background">@drawable/bg_checkbox</item>
     </style>
 </resources>

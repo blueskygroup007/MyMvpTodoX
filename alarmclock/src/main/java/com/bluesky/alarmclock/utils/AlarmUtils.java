@@ -20,7 +20,7 @@ public class AlarmUtils {
      * 后两种(ELAPSED)对应SystemClock.elapsedRealtime()（系统运行时间）
      */
     public static final int ALARM_TYPE_DEFAULT = AlarmManager.RTC_WAKEUP;
-    public static final String ALARM_ACTION = "com.bluesky.alarm.clock";
+    public static final String ALARM_ACTION = "com.bluesky.alarm.timeup";
     private static final String TAG = AlarmUtils.class.getSimpleName().toString();
 
     public static void setAlarm(Context context, Class<?> clsReceiver, long interval) {

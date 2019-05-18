@@ -3,6 +3,8 @@
     package="com.bluesky.alarmclock">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -11,23 +13,27 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ClockAlarmActivity"
-            android:theme="@style/FullScreenTheme"></activity>
-
-        <service android:name=".AccelerationService"></service>
+            android:name=".AlertDialogActivity"
+            android:theme="@android:style/Theme.Dialog"></activity>
 
         <receiver
-            android:name=".AlarmReceiver"
+            android:name=".AlarmClockReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.bluesky.alram.clock" />
+                <action android:name="com.bluesky.alram.timeup" />
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name=".ClockAlarmActivity"
+            android:theme="@style/FullScreenTheme" />
+
+        <service android:name=".AccelerationService" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

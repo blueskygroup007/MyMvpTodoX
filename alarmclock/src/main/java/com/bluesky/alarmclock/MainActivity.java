@@ -1,15 +1,10 @@
 package com.bluesky.alarmclock;
 
 import android.app.Dialog;
-import android.app.Service;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Messenger;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,8 +12,8 @@ import android.widget.TimePicker;
 
 import com.bluesky.alarmclock.data.Alarm;
 import com.bluesky.alarmclock.data.AlarmModelImpl;
-import com.bluesky.alarmclock.utils.AlarmUtils;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -26,13 +21,13 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity implements AlarmMainContract.MainView, View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private AlarmMainContract.MainPresenter mPresenter;
+    private static AlarmMainContract.MainPresenter mPresenter;
     private Dialog mDialog;
     public static final long INTERVAL = 10 * 1000;
     TimePicker mTimePicker;
     Button mBtnTimeAlarm;
     Button mBtnOneMinute;
-    Alarm mAlarm;
+    static Alarm mAlarm;
 
 
     @Override
@@ -52,12 +47,17 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
 
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
     public void onTimeAlarm(View view) {
 
     }
 
     public void onOneMinute(View view) {
-
+        mPresenter.startAlarm(null);
     }
 
     public void onCancel(View view) {
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
     }
 
 
-    private void showDialogInBroadcastReceiver(String message, int flag) {
+    private void showAlarmDialog(String message, int flag) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("闹钟");
         builder.setMessage(message);
@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mPresenter.stopAlarm(mAlarm);
-
             }
         });
         mDialog = builder.create();
@@ -95,9 +94,8 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
                 case 1:
                     Log.e(TAG, "收到了service发来的消息.....");
                     //让P去停止计时,关闭对话框,再重启计时
+//                    mPresenter.stopAccService();
                     mPresenter.stopAlarm(mAlarm);
-                    mPresenter.startAlarm(mAlarm);
-
                     break;
             }
         }
@@ -119,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
     public void showAlarmDialog() {
         String message = "点击确定关闭";
         int flag = 0;
-        showDialogInBroadcastReceiver(message, flag);
+        showAlarmDialog(message, flag);
     }
 
     @Override
