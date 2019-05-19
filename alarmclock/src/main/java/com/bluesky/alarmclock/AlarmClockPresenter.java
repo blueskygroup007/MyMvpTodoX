@@ -12,6 +12,12 @@ import com.bluesky.alarmclock.data.Alarm;
 import com.bluesky.alarmclock.data.AlarmModel;
 import com.bluesky.alarmclock.utils.AlarmUtils;
 
+/**
+ * Presenter 如果持有 Activity 的强引用，在请求结束之前 Activity 被销毁了，那么由于网络请求还没有返回，
+ * 导致 Presenter 一直持有 Activity 对象，使得 Activity 无法被回收，此时就容易发生内存泄漏，
+ * 解决这个问题需要通过弱引用来解决
+ *
+ */
 public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
 
     public static final String TAG = AlarmClockPresenter.class.getSimpleName();

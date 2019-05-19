@@ -1,10 +1,14 @@
 package com.bluesky.alarmclock;
 
+import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -12,6 +16,8 @@ import android.widget.TimePicker;
 
 import com.bluesky.alarmclock.data.Alarm;
 import com.bluesky.alarmclock.data.AlarmModelImpl;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -40,10 +46,9 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
         //应该是震动期间,才开始启动解除震动的监听
         //(迭代功能)但是在普通倒计时期间,也可以监听跳过本次倒计时?(已完成,进行下一轮计时).
         //(mvp设计)解除震动等等。先设计MVP.
-//        startService();
+        Intent intentService = new Intent(this, ForegroundService.class);
+        startService(intentService);
 
-        mPresenter = new AlarmClockPresenter(new AlarmModelImpl(), this);
-        mPresenter.start();
 
     }
 
@@ -126,6 +131,11 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
     }
 
     @Override
+    public boolean isActive() {
+        return isForeground(this, this.getClass().getSimpleName());
+    }
+
+    @Override
     public void setPresenter(AlarmMainContract.MainPresenter presenter) {
         mPresenter = presenter;
     }
@@ -139,5 +149,38 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
         return mHandler;
     }
 
+
+    public void onStartForeService(View view) {
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        startService(serviceIntent);
+    }
+
+    public void onStopForeService(View view) {
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        stopService(serviceIntent);
+    }
+
+    /**
+     * 判断某个界面是否在前台
+     *
+     * @param context   Context
+     * @param className 界面的类名
+     * @return 是否在前台显示
+     */
+    public static boolean isForeground(Context context, String className) {
+        if (context == null || TextUtils.isEmpty(className))
+            return false;
+        ActivityManager am = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(1);
+//        boolean flag=false;
+        for (ActivityManager.RunningTaskInfo taskInfo : list) {
+            Log.e(TAG, "TaskName=" + taskInfo.topActivity.getShortClassName() + " ClassName=" + className);
+            if (taskInfo.topActivity.getShortClassName().contains(className)) { // 说明它已经启动了
+//                flag = true;
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
