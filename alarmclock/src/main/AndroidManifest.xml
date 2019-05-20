@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <application
         android:allowBackup="true"
@@ -14,10 +15,6 @@
         android:theme="@style/AppTheme">
         <service
             android:name=".ForeService"
-            android:enabled="true"
-            android:exported="true"></service>
-        <service
-            android:name=".ForegroundService"
             android:enabled="true"
             android:exported="true"></service>
 
@@ -34,9 +31,6 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name=".ClockAlarmActivity"
-            android:theme="@style/FullScreenTheme" />
 
         <service android:name=".AccelerationService" />
 

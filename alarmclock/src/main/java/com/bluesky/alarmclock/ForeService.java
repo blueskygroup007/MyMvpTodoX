@@ -19,6 +19,19 @@ import androidx.core.app.NotificationCompat;
  * @date 2019/5/20
  * Description:
  */
+
+/**
+ * todo 修改方案:
+ * 1.service需要一个无参构造方法.
+ * 2.service的启动方式改为绑定.这样就有iBinder可以操控service
+ * 2.1 绑定方式启动,更符合需求:(看音乐播放器的service的使用方法)
+ * 2.2 可以先startService(),然后谁需要操作它,就bindService()
+ * 3.service应该在P中被启动
+ * <p>
+ * todo 前台服务的必要性是什么?不容易被回收,有通知图标.
+ * todo IntentService的使用(因为service是运行在主线程中,所以耗时任务容易产生ANR)
+ *
+ */
 public class ForeService extends Service {
     private static final String TAG = ForeService.class.getSimpleName();
     public static final int ID = 12346;
@@ -98,6 +111,7 @@ public class ForeService extends Service {
                 .setContentTitle("新版Noti")
                 .setContentText("消息内容....")
                 .setSmallIcon(R.drawable.ic_star_border_black_24dp)
+                .setContentIntent(pi)
                 .setDefaults(Notification.DEFAULT_ALL)
                 // 该方法在Android 4.1之前会被忽略
                 .setStyle(new NotificationCompat.BigTextStyle()

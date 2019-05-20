@@ -1,9 +1,7 @@
 package com.bluesky.alarmclock;
 
-import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -11,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,11 +16,11 @@ import android.widget.TimePicker;
 
 import com.bluesky.alarmclock.data.Alarm;
 
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import static com.bluesky.alarmclock.utils.ActivityManagerUtils.isServiceRunning;
 
 
 public class MainActivity extends AppCompatActivity implements AlarmMainContract.MainView, View.OnClickListener {
@@ -36,6 +33,12 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
     Button mBtnTimeAlarm;
     Button mBtnOneMinute;
     static Alarm mAlarm;
+
+    /**
+     * Activity是否可见的标志
+     */
+    private boolean isVisible;
+
     ServiceConnection mConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -72,34 +75,6 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
             startService(intentService);
         }
         bindService(intentService, mConn, BIND_AUTO_CREATE);
-    }
-
-    /**
-     * 查找后台服务
-     * todo 1.提取到utils工具类
-     * todo 2.serviceName最好改为全名,方法中的getShortClassName也改为getClassName
-     *
-     * @param context
-     * @param serviceName
-     * @return
-     */
-    public static boolean isServiceRunning(Context context, String serviceName) {
-        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> serviceInfoList = manager.getRunningServices(200);
-        if (serviceInfoList.size() <= 0) {
-            Log.e(TAG, "---------->后台服务数量为空");
-
-            return false;
-        }
-        for (ActivityManager.RunningServiceInfo info : serviceInfoList) {
-            Log.e(TAG, "---------->后台服务的name=" + info.service.getShortClassName());
-            if (info.service.getShortClassName().contains(serviceName)) {
-                Log.e(TAG, "---------->后台服务ForeService找到啦-------------------!!!");
-
-                return true;
-            }
-        }
-        return false;
     }
 
 
@@ -185,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
 
     @Override
     public boolean isActive() {
-        return isForeground(this, this.getClass().getSimpleName());
+        return isVisible;
     }
 
     @Override
@@ -204,50 +179,39 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
 
 
     public void onStartForeService(View view) {
-        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        Intent serviceIntent = new Intent(this, ForeService.class);
         startService(serviceIntent);
     }
 
     public void onStopForeService(View view) {
-        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        Intent serviceIntent = new Intent(this, ForeService.class);
         stopService(serviceIntent);
     }
 
-    /**
-     * 判断某个界面是否在前台
-     *
-     * @param context   Context
-     * @param className 界面的类名
-     * @return 是否在前台显示
-     */
-    public static boolean isForeground(Context context, String className) {
-        if (context == null || TextUtils.isEmpty(className)) {
-            return false;
-        }
-        ActivityManager am = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(1);
-//        boolean flag=false;
-        for (ActivityManager.RunningTaskInfo taskInfo : list) {
-            Log.e(TAG, "TaskName=" + taskInfo.topActivity.getShortClassName() + " ClassName=" + className);
-            if (taskInfo.topActivity.getShortClassName().contains(className)) { // 说明它已经启动了
-//                flag = true;
-                return true;
-            }
-        }
-        return false;
-    }
 
+    /**
+     * 此时Activity已经有可能不可见.
+     */
     @Override
     protected void onPause() {
         super.onPause();
         Log.e(TAG, "Activity被onPause了...");
-
+        isVisible = false;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.e(TAG, "Activity被onResume了...");
+        isVisible = true;
+    }
+
+    /**
+     * 此时Activity不可见
+     */
+    @Override
+    protected void onStop() {
+        super.onStop();
 
     }
 
