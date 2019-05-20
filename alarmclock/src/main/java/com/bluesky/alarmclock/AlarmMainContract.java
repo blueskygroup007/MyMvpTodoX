@@ -4,7 +4,7 @@ import com.bluesky.alarmclock.data.Alarm;
 
 public interface AlarmMainContract {
 
-    interface MainPresenter extends BasePresenter {
+    interface MainPresenter extends BasePresenter<MainView> {
 
         /**
          * 启动闹钟
@@ -38,6 +38,7 @@ public interface AlarmMainContract {
          * 停止加速度监听服务
          */
         void stopAccService();
+
 
     }
 

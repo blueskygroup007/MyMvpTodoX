@@ -2,11 +2,14 @@ package com.bluesky.alarmclock;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,7 +18,6 @@ import android.widget.Button;
 import android.widget.TimePicker;
 
 import com.bluesky.alarmclock.data.Alarm;
-import com.bluesky.alarmclock.data.AlarmModelImpl;
 
 import java.util.List;
 
@@ -34,10 +36,26 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
     Button mBtnTimeAlarm;
     Button mBtnOneMinute;
     static Alarm mAlarm;
+    ServiceConnection mConn = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.e(TAG, "onServiceConnected被回调了...");
 
+            ForeService.MyBinder mBinder = (ForeService.MyBinder) service;
+            mBinder.doSomeThing();
+            mBinder.start(MainActivity.this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.e(TAG, "onServiceDisconnected被回调了...");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.e(TAG, "Activity被onCreate了...");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTimePicker = findViewById(R.id.time_picker);
@@ -46,14 +64,49 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
         //应该是震动期间,才开始启动解除震动的监听
         //(迭代功能)但是在普通倒计时期间,也可以监听跳过本次倒计时?(已完成,进行下一轮计时).
         //(mvp设计)解除震动等等。先设计MVP.
-        Intent intentService = new Intent(this, ForegroundService.class);
-        startService(intentService);
+        boolean isRunning = isServiceRunning(this, ForeService.class.getSimpleName());
+        Intent intentService = new Intent(this, ForeService.class);
+        if (!isRunning) {
+            Log.e(TAG, "---------->后台服务ForeService没找到!!!");
 
-
+            startService(intentService);
+        }
+        bindService(intentService, mConn, BIND_AUTO_CREATE);
     }
+
+    /**
+     * 查找后台服务
+     * todo 1.提取到utils工具类
+     * todo 2.serviceName最好改为全名,方法中的getShortClassName也改为getClassName
+     *
+     * @param context
+     * @param serviceName
+     * @return
+     */
+    public static boolean isServiceRunning(Context context, String serviceName) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> serviceInfoList = manager.getRunningServices(200);
+        if (serviceInfoList.size() <= 0) {
+            Log.e(TAG, "---------->后台服务数量为空");
+
+            return false;
+        }
+        for (ActivityManager.RunningServiceInfo info : serviceInfoList) {
+            Log.e(TAG, "---------->后台服务的name=" + info.service.getShortClassName());
+            if (info.service.getShortClassName().contains(serviceName)) {
+                Log.e(TAG, "---------->后台服务ForeService找到啦-------------------!!!");
+
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
+        Log.e(TAG, "Activity被onSaveInstanceState了...");
+
         super.onSaveInstanceState(outState);
     }
 
@@ -168,8 +221,9 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
      * @return 是否在前台显示
      */
     public static boolean isForeground(Context context, String className) {
-        if (context == null || TextUtils.isEmpty(className))
+        if (context == null || TextUtils.isEmpty(className)) {
             return false;
+        }
         ActivityManager am = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(1);
 //        boolean flag=false;
@@ -183,4 +237,24 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
         return false;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e(TAG, "Activity被onPause了...");
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e(TAG, "Activity被onResume了...");
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConn);
+        Log.e(TAG, "Activity被onDestroy了...");
+    }
 }

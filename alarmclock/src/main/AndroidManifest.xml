@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
+            android:name=".ForeService"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service
             android:name=".ForegroundService"
             android:enabled="true"
             android:exported="true"></service>

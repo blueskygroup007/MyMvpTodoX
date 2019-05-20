@@ -55,6 +55,8 @@ public class ForegroundService extends Service {
         Log.e(TAG, "前台服务开启了.....");
 //        return super.onStartCommand(intent, flags, startId);
         Intent notificationIntent = new Intent(this, MainActivity.class);
+
+        //这里的PendingIntent就是为了标识Notification的点击事件(开启MainActivity)
         PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         Notification noti = new Notification.Builder(this)
                 .setContentTitle("Title")
