@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -13,26 +14,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".TimeUpActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AlertDialogAct"></activity>
+        <!--android:taskAffinity="com.bluesky.alarm.dialog"-->
+
         <service
             android:name=".ForeService"
             android:enabled="true"
             android:exported="true"></service>
-
-        <activity
-            android:name=".AlertDialogActivity"
-            android:theme="@android:style/Theme.Dialog" />
-
-        <receiver
-            android:name=".AlarmClockReceiver"
-            android:enabled="true"
-            android:exported="true">
+        <receiver android:name=".AlarmClockReceiver">
             <intent-filter>
-                <action android:name="com.bluesky.alram.timeup" />
+                <action android:name="com.bluesky.alarm.timeup" />
             </intent-filter>
         </receiver>
-
-
-        <service android:name=".AccelerationService" />
 
         <activity android:name=".MainActivity">
             <intent-filter>

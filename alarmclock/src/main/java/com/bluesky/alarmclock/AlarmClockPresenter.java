@@ -1,16 +1,24 @@
 package com.bluesky.alarmclock;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Handler;
-import android.os.Messenger;
 import android.os.Vibrator;
 import android.util.Log;
 
 import com.bluesky.alarmclock.data.Alarm;
 import com.bluesky.alarmclock.data.AlarmModel;
 import com.bluesky.alarmclock.utils.AlarmUtils;
+
+import static android.content.Context.SENSOR_SERVICE;
+import static com.bluesky.alarmclock.utils.AlarmUtils.ALARM_ACTION;
 
 /**
  * Presenter 如果持有 Activity 的强引用，在请求结束之前 Activity 被销毁了，那么由于网络请求还没有返回，
@@ -20,29 +28,45 @@ import com.bluesky.alarmclock.utils.AlarmUtils;
 public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
 
     public static final String TAG = AlarmClockPresenter.class.getSimpleName();
+
     AlarmModel mModel;
     AlarmMainContract.MainView mView;
-    private Intent mService;
+    private AlarmMainContract.AlertView mAlertView;
     private Context mContext;
     private Handler mHandler;
 
     long mStartMillis = System.currentTimeMillis();
     long mRemainMillis = 0;
-
-//    private Messenger mMessenger;
+    private SensorManager sensorManager;
+    private Sensor mSensor;
+    private static final int RADIO_ACC = 17;//传感器幅度值常量
+    private AccelerometerLisenter mLisenter = new AccelerometerLisenter();
+    private AlarmClockReceiver mReceiver;
 
     //todo ---------当前进度----------
     //todo 如何保证前台被杀,后台AlarmManager会一直计时
     //todo 如何协调  加速度监听 , 闹钟到期的广播接收者 ,与 activity和presenter的关系.
 
-    public AlarmClockPresenter(AlarmModel mModel, AlarmMainContract.MainView mView) {
+
+    public static final class AlarmReceiver extends BroadcastReceiver {
+        public final String TAG = AlarmReceiver.class.getSimpleName();
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e(TAG, "AlarmReceiver接收到了广播");
+            Intent actIntent = new Intent();
+            actIntent.setClass(context, TimeUpActivity.class);
+            //todo  被代替 android:launchMode="singleInstance"
+            //actIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(actIntent);
+        }
+    }
+
+    public AlarmClockPresenter(Context context, AlarmModel mModel, AlarmMainContract.MainView mView) {
         this.mModel = mModel;
         this.mView = mView;
         mView.setPresenter(this);
-        mContext = ((MainActivity) mView).getBaseContext();
-        mHandler = ((MainActivity) mView).getHandler();
-//        mMessenger=((MainActivity)mView).getMessenger();
-
+        mContext = context;
     }
 
     @Override
@@ -59,7 +83,7 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
                  */
 
                 //这里传入广播接收者的类名
-                AlarmUtils.setAlarm(mContext, AlarmClockReceiver.class, alarm.getInterval());
+                AlarmUtils.setAlarm(mContext, AlarmClockReceiver.class, alarm.getInterval(), alarm.getId(), alarm);
                 mStartMillis = System.currentTimeMillis();
             }
 
@@ -73,22 +97,28 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
 //        startAccService(mContext);
     }
 
-    private void startAccService(Context context) {
-        Log.e(TAG, "启动了sensor监听....");
 
-        if (mService == null) {
-            mService = new Intent(context, AccelerationService.class);
-            mService.putExtra("messenger", new Messenger(mHandler));
+    /**
+     * 开启加速度监听
+     */
+    @Override
+    public void registAccListener() {
+        Log.e(TAG, "监听服务启动了");
+        if (sensorManager == null) {
+            sensorManager = (SensorManager) mContext.getSystemService(SENSOR_SERVICE);
         }
-        context.startService(mService);
 
+        if (mSensor == null) {
+            mSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        }
+        sensorManager.registerListener(mLisenter, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
 
     @Override
     public void stopAlarm(Alarm alarm) {
         Log.e(TAG, "停止Alarm...");
-        stopAccService();
+        unregistAccListener();
         mView.closeAlarmDialog();
         setVibrator(false);
         mHandler.postDelayed(new Runnable() {
@@ -103,7 +133,7 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
     public void pauseAlarm(Alarm alarm) {
         Log.e(TAG, "暂停Alarm...");
 
-        AlarmUtils.cancelAlarm(mContext, AlarmClockReceiver.class);
+        AlarmUtils.cancelAlarm(mContext, AlarmReceiver.class);
         mRemainMillis = alarm.getInterval() - (System.currentTimeMillis() - mStartMillis);
         Log.e(TAG, "剩余时间是:" + mRemainMillis / 1000 + "秒");
     }
@@ -114,14 +144,59 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
 
         mView.showAlarmDialog();
         setVibrator(true);
-        startAccService(mContext);
     }
 
     @Override
-    public void stopAccService() {
-        mContext.stopService(mService);
+    public void unregistAccListener() {
+        sensorManager.unregisterListener(mLisenter, mSensor);
     }
 
+    @Override
+    public void stop() {
+        unregistBroadcastReceiver();
+        unregistAccListener();
+    }
+
+    @Override
+    public void setMainView(AlarmMainContract.MainView view) {
+        mView = view;
+    }
+
+    @Override
+    public void setAlertView(AlarmMainContract.AlertView view) {
+        mAlertView = view;
+        //todo 如果传进来的不是空,那么,把P传回去
+        if (view != null) {
+            mAlertView.setPresenter(this);
+        }
+    }
+
+    class AccelerometerLisenter implements SensorEventListener {
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            Sensor sensor1 = event.sensor;
+            if (sensor1.getType() == Sensor.TYPE_ACCELEROMETER) {
+                float valueX = Math.abs(event.values[0]);
+                float valueY = Math.abs(event.values[1]);
+                float valueZ = Math.abs(event.values[2]);
+                if (valueX > RADIO_ACC || valueY > RADIO_ACC || valueZ > RADIO_ACC) {
+                    Log.e(TAG, "传感器数据:" + "X=" + valueX + " Y=" + valueY + " Z=" + valueZ);
+                    //完成了一次消息发送.该service已经不再有用
+                    //该方法让AlertView自己调用onDestory(),在该析构方法中,有反注册加速度监听器,取消震动,等操作
+
+                    mAlertView.close();
+
+//                  sensorManager.unregisterListener(mLisenter, mSensor);
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    }
 
     @Override
     public void start() {
@@ -130,6 +205,7 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
         /*
          *这里应该是放置程序启动初期,初始化界面,加载列表等操作
          */
+//        registBroadcastReceiver();
     }
 
     @Override
@@ -139,7 +215,8 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
     }
 
 
-    private void setVibrator(boolean onOrOff) {
+    @Override
+    public void setVibrator(boolean onOrOff) {
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Service.VIBRATOR_SERVICE);
         if (!vibrator.hasVibrator()) {
             return;
@@ -151,5 +228,29 @@ public class AlarmClockPresenter implements AlarmMainContract.MainPresenter {
             vibrator.cancel();
         }
 
+    }
+
+    @Override
+    public void registBroadcastReceiver() {
+        String press1 = "android.intent.action.BOOT_COMPLETED";
+        String press2 = "android.intent.action.USER_PRESENT";
+
+        Log.e(TAG, "注册了广播接收者.....");
+        mReceiver = new AlarmClockReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ALARM_ACTION);
+//        filter.addAction(press1);
+//        filter.addAction(press2);
+        Intent temp = mContext.registerReceiver(mReceiver, filter);
+        if (temp != null) {
+            Log.e(TAG, "注册结果=" + temp.toString());
+        } else {
+            Log.e(TAG, "注册广播接收者失败");
+        }
+    }
+
+    @Override
+    public void unregistBroadcastReceiver() {
+        mContext.unregisterReceiver(mReceiver);
     }
 }

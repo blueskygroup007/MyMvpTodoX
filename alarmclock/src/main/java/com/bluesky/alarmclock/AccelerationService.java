@@ -23,10 +23,10 @@ public class AccelerationService extends Service {
     public static final String TAG = AccelerationService.class.getSimpleName();
     private SensorManager sensorManager;
     private static final int RADIO_ACC = 17;//传感器幅度值常量
+    private AccelerometerLisenter mLisenter = new AccelerometerLisenter();
 
     private Messenger mMessenger;
     private Sensor mSensor;
-    private AccelerometerLisenter mLisenter = new AccelerometerLisenter();
 
     @Nullable
     @Override
@@ -57,6 +57,7 @@ public class AccelerationService extends Service {
 
         }
 
+        //这里SENSOR_DELAY_FASTEST使用了最快的检测频率,可以尝试改成GAME
         sensorManager.registerListener(mLisenter, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         return super.onStartCommand(intent, flags, startId);

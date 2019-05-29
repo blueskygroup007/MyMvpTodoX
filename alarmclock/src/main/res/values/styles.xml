@@ -11,6 +11,11 @@
         <item name="checkboxStyle">@style/CheckBoxSel</item>
     </style>
 
+    <style name="AlertDialogAct" parent="Theme.AppCompat.Light.Dialog">
+
+
+    </style>
+
     <style name="FullScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
     </style>

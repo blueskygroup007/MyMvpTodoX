@@ -21,6 +21,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import static com.bluesky.alarmclock.utils.ActivityManagerUtils.isServiceRunning;
+import static com.bluesky.alarmclock.utils.AlarmUtils.ALARM_ACTION;
 
 
 public class MainActivity extends AppCompatActivity implements AlarmMainContract.MainView, View.OnClickListener {
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
 
     public void onOneMinute(View view) {
         mPresenter.startAlarm(null);
+
     }
 
     public void onCancel(View view) {
@@ -127,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
                 case 1:
                     Log.e(TAG, "收到了service发来的消息.....");
                     //让P去停止计时,关闭对话框,再重启计时
-//                    mPresenter.stopAccService();
+//                    mPresenter.unregistAccListener();
                     mPresenter.stopAlarm(mAlarm);
                     break;
             }
@@ -218,7 +220,19 @@ public class MainActivity extends AppCompatActivity implements AlarmMainContract
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mPresenter.setAlertView(null);
         unbindService(mConn);
         Log.e(TAG, "Activity被onDestroy了...");
+    }
+
+    public void sendBroadcast(View view) {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.e(TAG, "activity主动发送广播了.....");
+                sendBroadcast(new Intent(ALARM_ACTION));
+            }
+        }, 2000);
     }
 }

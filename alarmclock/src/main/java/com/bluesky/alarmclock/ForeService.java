@@ -1,10 +1,13 @@
 package com.bluesky.alarmclock;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,6 +16,9 @@ import com.bluesky.alarmclock.data.AlarmModelImpl;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+
+import static com.bluesky.alarmclock.utils.AlarmUtils.ALARM_ACTION;
+import static com.bluesky.alarmclock.utils.AlarmUtils.ALARM_TYPE_DEFAULT;
 
 /**
  * @author BlueSky
@@ -30,7 +36,6 @@ import androidx.core.app.NotificationCompat;
  * <p>
  * todo 前台服务的必要性是什么?不容易被回收,有通知图标.
  * todo IntentService的使用(因为service是运行在主线程中,所以耗时任务容易产生ANR)
- *
  */
 public class ForeService extends Service {
     private static final String TAG = ForeService.class.getSimpleName();
@@ -58,13 +63,17 @@ public class ForeService extends Service {
          */
         public void start(AlarmMainContract.MainView view) {
             if (mPresenter == null) {
-                mPresenter = new AlarmClockPresenter(new AlarmModelImpl(), view);
+                mPresenter = new AlarmClockPresenter(ForeService.this, new AlarmModelImpl(), view);
                 mPresenter.start();
             } else {
                 mPresenter.setView(view);
                 mPresenter.start();
             }
 
+        }
+
+        public void setTimeUpView(AlarmMainContract.AlertView alertView) {
+            mPresenter.setAlertView(alertView);
         }
     }
 
@@ -120,24 +129,6 @@ public class ForeService extends Service {
         return builder.build();
     }
 
-    public void createNotiOld() {
-        //点击通知栏的PI
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        //关闭通知栏的PI
-        Intent dismissIntent = new Intent(this, ForeService.class);
-        dismissIntent.setAction(ACTION_DISMISS);
-        PendingIntent piDismiss = PendingIntent.getService(
-                this, 0, dismissIntent, 0);
-        Notification noti = new Notification.Builder(this)
-                .setContentTitle("Title")
-                .setContentText("Message")
-                .setSmallIcon(getApplicationInfo().icon)
-                .setContentIntent(pi)
-                //Notification.Builder的addAction()方法对版本有要求,所以改用NotificationCompat.Builder
-//                .addAction(new Notification.Action(R.drawable.ic_star_black_24dp, "close", piDismiss))
-                .build();
-    }
 
     @Override
     public boolean onUnbind(Intent intent) {
@@ -148,7 +139,35 @@ public class ForeService extends Service {
     @Override
     public void onDestroy() {
         Log.e(TAG, "前台服务onDestroy了.....");
-        super.onDestroy();
         stopForeground(true);
+        mPresenter.stop();
+        super.onDestroy();
+    }
+
+
+    /**
+     * todo 在service中启动一个alarm闹钟,应该没问题
+     * todo ------------当前问题是:广播接收者放在P中,可以注册广播,但是无法接收到广播.不知道是Alarm没申请成功,还是接收者接收不到.
+     * @param interval
+     */
+    public void startAlarm(int interval) {
+        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmClockPresenter.AlarmReceiver.class);
+        intent.setAction(ALARM_ACTION);
+        PendingIntent pi = PendingIntent.getBroadcast(this, 0, intent, 0);
+
+        /**
+         *
+         * SystemClock.elapsedRealtime()  系统消逝的时间
+         * SystemClock.currentThreadTimeMillis() 系统当前线程启动毫秒数
+         */
+        Log.d(TAG, "Build.VERSION.SDK_INT=" + Build.VERSION.SDK_INT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            am.setExactAndAllowWhileIdle(ALARM_TYPE_DEFAULT, System.currentTimeMillis() + interval, pi);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            am.setExact(ALARM_TYPE_DEFAULT, System.currentTimeMillis() + interval, pi);
+        } else {
+            am.set(ALARM_TYPE_DEFAULT, System.currentTimeMillis() + interval, pi);
+        }
     }
 }

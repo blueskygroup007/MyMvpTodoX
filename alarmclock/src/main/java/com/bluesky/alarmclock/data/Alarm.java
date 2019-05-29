@@ -1,6 +1,9 @@
 package com.bluesky.alarmclock.data;
 
-public class Alarm {
+import java.io.Serializable;
+
+public class Alarm implements Serializable {
+    private int id;
     private String name;
     private int interval;
 
@@ -11,6 +14,14 @@ public class Alarm {
 
     public String getName() {
         return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void setName(String name) {
@@ -28,7 +39,8 @@ public class Alarm {
     @Override
     public String toString() {
         return "Alarm{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", interval=" + interval +
                 '}';
     }
